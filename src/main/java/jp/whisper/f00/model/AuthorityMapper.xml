@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.whisper.f00.model.AuthorityMapper">
+	<resultMap id="result" type="jp.whisper.f00.model.Authority">
+		<result property="id" column="ID" jdbcType="NUMERIC" />
+		<result property="code" column="CODE" jdbcType="VARCHAR" />
+		<result property="displayName" column="DISPLAY_NAME" jdbcType="VARCHAR" />
+		<result property="authUrl" column="AUTH_URL" jdbcType="VARCHAR" />
+		<result property="authType" column="AUTH_TYPE" jdbcType="VARCHAR" />
+		<result property="authIndex" column="AUTH_INDEX" jdbcType="NUMERIC" />
+		<result property="parent" column="PARENT" jdbcType="NUMERIC" />
+		<result property="remark" column="REMARK" jdbcType="VARCHAR" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="updateTime" column="UPDATE_TIME" />
+		<result property="deleteFlag" column="DELETE_FLAG" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="other-condition">
+		<if test="id != null"> and ID=#{id}</if>
+		<if test="code != null"> and CODE = #{code}</if>
+		<if test="displayName != null"> and DISPLAY_NAME = #{displayName}</if>
+		<if test="authUrl != null"> and AUTH_URL = #{authUrl}</if>
+		<if test="authType != null"> and AUTH_TYPE = #{authType}</if>
+		<if test="authIndex != null"> and AUTH_INDEX = #{authIndex}</if>
+		<if test="parent != null"> and PARENT = #{parent}</if>
+		<if test="remark != null"> and REMARK = #{remark}</if>
+		<if test="createTime != null"> and CREATE_TIME = #{createTime}</if>
+		<if test="updateTime != null"> and UPDATE_TIME = #{updateTime}</if>
+		<if test="deleteFlag != null"> and DELETE_FLAG = #{deleteFlag}</if>
+	</sql>
+
+	<select id="select" resultMap="result">
+		SELECT
+		ID,CODE,DISPLAY_NAME,AUTH_URL,AUTH_TYPE,AUTH_INDEX,PARENT,REMARK,CREATE_TIME,UPDATE_TIME,DELETE_FLAG
+		FROM AUTHORITIES
+		<where>
+			delete_flag ='0'
+			<if test="value != null "> and ID=#{value}</if>
+		</where>
+	</select>
+
+	<select id="selectByMap" resultMap="result">
+		SELECT
+		ID,CODE,DISPLAY_NAME,AUTH_URL,AUTH_TYPE,AUTH_INDEX,PARENT,REMARK,CREATE_TIME,UPDATE_TIME,DELETE_FLAG
+		FROM AUTHORITIES
+		<where>
+			delete_flag ='0'
+			<if test="findBy != null">
+				<include refid="other-condition" />
+			</if>
+			<if test="findLikeBy != null">
+				<if test="code != null "> and CODE like '%#{code}%'</if>
+				<if test="displayName != null "> and DISPLAY_NAME like '%#{displayName}%'</if>
+				<if test="authUrl != null "> and AUTH_URL like '%#{authUrl}%'</if>
+				<if test="authType != null "> and AUTH_TYPE like '%#{authType}%'</if>
+				<if test="remark != null "> and REMARK like '%#{remark}%'</if>
+				<if test="deleteFlag != null "> and DELETE_FLAG like '%#{deleteFlag}%'</if>
+			</if>
+		</where>
+	</select>
+
+	<select id="query" resultMap="result"
+		parameterType="jp.whisper.f00.model.AuthorityQuery">
+		<include refid="BaseMapper.paginationStart" />
+		SELECT
+		ID,CODE,DISPLAY_NAME,AUTH_URL,AUTH_TYPE,AUTH_INDEX,PARENT,REMARK,CREATE_TIME,UPDATE_TIME,DELETE_FLAG
+		FROM AUTHORITIES WHERE delete_flag ='0'
+		<include refid="other-condition" />
+		<if test="sortname != null"> ORDER BY #{sortname} #{sortorder} </if>
+		<include refid="BaseMapper.paginationEnd" />
+	</select>
+
+	<select id="count" resultType="int"
+		parameterType="jp.whisper.f00.model.AuthorityQuery">
+		SELECT count(ID) FROM AUTHORITIES WHERE delete_flag ='0'
+		<include refid="other-condition" />
+	</select>
+
+	<insert id="insert" parameterType="jp.whisper.f00.model.Authority">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+			SELECT
+			SEQ_AUTHORITIES.NEXTVAL AS id FROM dual
+		</selectKey>
+		INSERT INTO AUTHORITIES(
+		ID,CODE,DISPLAY_NAME,AUTH_URL,AUTH_TYPE,AUTH_INDEX,PARENT,REMARK,CREATE_TIME,UPDATE_TIME,DELETE_FLAG
+		) VALUES
+		(#{id},#{code},#{displayName},#{authUrl},#{authType},#{authIndex},#{parent},#{remark},systimestamp,null,'0'
+		)
+	</insert>
+
+	<insert id="insertWithObjectKey" parameterType="jp.whisper.f00.model.Authority">
+		INSERT INTO
+		AUTHORITIES(
+		ID,CODE,DISPLAY_NAME,AUTH_URL,AUTH_TYPE,AUTH_INDEX,PARENT,REMARK,CREATE_TIME,UPDATE_TIME,DELETE_FLAG
+		) VALUES
+		(#{id},#{code},#{displayName},#{authUrl},#{authType},#{authIndex},#{parent},#{remark},systimestamp,null,'0'
+		)
+	</insert>
+
+	<update id="update" parameterType="jp.whisper.f00.model.Authority">
+		UPDATE AUTHORITIES SET
+		CODE=#{code},DISPLAY_NAME=#{displayName},AUTH_URL=#{authUrl},AUTH_TYPE=#{authType},AUTH_INDEX=#{authIndex},PARENT=#{parent},REMARK=#{remark},UPDATE_TIME=
+		systimestamp WHERE ID=#{id}
+	</update>
+
+	<update id="updateMapModel" parameterType="java.util.Map">
+		UPDATE AUTHORITIES SET update_time=systimestamp
+		<set>
+			<if test="code != null ">CODE=#{code},</if>
+			<if test="code == null ">CODE=null ,</if>
+			<if test="displayName != null ">DISPLAY_NAME=#{displayName},</if>
+			<if test="displayName == null ">DISPLAY_NAME=null ,</if>
+			<if test="authUrl != null ">AUTH_URL=#{authUrl},</if>
+			<if test="authUrl == null ">AUTH_URL=null ,</if>
+			<if test="authType != null ">AUTH_TYPE=#{authType},</if>
+			<if test="authType == null ">AUTH_TYPE=null ,</if>
+			<if test="authIndex != null ">AUTH_INDEX=#{authIndex},</if>
+			<if test="authIndex == null ">AUTH_INDEX=null ,</if>
+			<if test="parent != null ">PARENT=#{parent},</if>
+			<if test="parent == null ">PARENT=null ,</if>
+			<if test="remark != null ">REMARK=#{remark},</if>
+			<if test="remark == null ">REMARK=null ,</if>
+		</set>
+		WHERE ID=#{id}
+	</update>
+
+	<delete id="deleteByPrimaryKey">
+		DELETE FROM AUTHORITIES WHERE ID = #{value}
+	</delete>
+
+	<delete id="delete">
+		DELETE FROM AUTHORITIES
+		<where>
+			<include refid="other-condition" />
+		</where>
+	</delete>
+
+	<update id="logicDeleteByPrimaryKey">
+		UPDATE AUTHORITIES SET delete_flag='1',
+		update_time=systimestamp WHERE ID =
+		#{value}
+	</update>
+
+	<update id="logicDelete">
+		UPDATE AUTHORITIES SET delete_flag='1', update_time=systimestamp
+		<where>
+			<include refid="other-condition" />
+		</where>
+	</update>
+
+	<!-- 以下はカスタマイズSQLである -->
+	<select id="listAuthoritiesByUserMap" resultMap="result">
+		SELECT DISTINCT
+		B.*
+		FROM
+		R_ROLES_AUTHORITIES A
+		LEFT JOIN AUTHORITIES B
+		ON A.AUTHORITY_ID =
+		B.ID
+		WHERE
+		EXISTS (
+		SELECT
+		RUR.ROLE_ID
+		FROM
+		R_USERS_ROLES RUR
+		WHERE
+		RUR.USER_ID = (SELECT ID FROM USERS WHERE LOGIN_ID = #{loginId} AND
+		DELETE_FLAG = '0')
+		AND RUR.DELETE_FLAG = '0'
+		AND A.ROLE_ID = RUR.ROLE_ID
+		)
+		AND A.DELETE_FLAG = '0'
+		AND B.DELETE_FLAG = '0'
+	</select>
+</mapper>
+

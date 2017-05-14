@@ -1,0 +1,25 @@
+package ${pkgPath};
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import jp.whisper.common.service.impl.BaseServiceImpl;
+import ${managerPath};
+import ${daoPath};
+import ${modelPath};
+
+@Service
+public class ${clzName}ServiceImpl extends BaseServiceImpl<${clzName}> implements ${clzName}Service
+{
+	@Autowired
+	public ${clzName}ServiceImpl(${clzName}DAO ${clzNameToLowerCase}DAO){
+		super();
+		super.setBaseDAO(${clzNameToLowerCase}DAO);
+	}
+
+	public ${clzName}DAO get${clzName}DAO()
+	{
+		return (${clzName}DAO)super.baseDAO;
+	}
+}
+

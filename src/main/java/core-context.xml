@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		lazy-init="false">
+		<property name="locations">
+			<list>
+				<value>
+					classpath*:whisper-config.properties
+				</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- dataSource -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxTotal" value="${dspool.maxactive}" />
+		<property name="maxIdle" value="${dspool.maxidle}" />
+		<property name="minIdle" value="1" />
+		<property name="maxWaitMillis" value="3000000" />
+		<property name="defaultAutoCommit" value="true" />
+		<property name="logAbandoned" value="true" />
+	</bean>
+
+	<!-- transaction manager, use DataSourceTransactionManager" for JDBC local
+		tx -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- enable transaction demarcation with annotations -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:jp/whisper/**/model/*.xml" />
+	</bean>
+
+	<bean id="springBeanUtil" class="jp.whisper.common.util.SpringBeanUtil"/>
+</beans>

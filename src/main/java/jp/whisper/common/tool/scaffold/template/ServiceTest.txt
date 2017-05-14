@@ -1,0 +1,18 @@
+package ${pkgPath};
+
+
+import jp.whisper.common.BaseTestCase;
+import ${modelPath};
+
+public class ${clzName}ServiceTest extends BaseTestCase
+{
+	private ${clzName}Service service;
+
+	public void setUp() throws Exception
+	{
+		super.setUp();
+		service=(${clzName}Service)ctx.getBean("${clzNameLC}Service");
+	}
+
+}
+

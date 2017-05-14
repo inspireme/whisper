@@ -1,0 +1,11 @@
+package ${pkgPath};
+
+import jp.whisper.common.dao.BaseDAO;
+import ${modelPath};
+
+public interface ${clzName}DAO extends BaseDAO<${clzName}>
+{
+
+}
+
+

@@ -1,0 +1,9 @@
+package ${pkgPath};
+
+import jp.whisper.common.dao.BaseQuery;
+
+public class ${clzName}Query extends BaseQuery
+{
+${fieldsDeclareInfo}
+    //TODO
+}

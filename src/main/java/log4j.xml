@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j-1.2.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Console output -->
+
+	<appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p %d{MM-dd HH:mm:ss} %m  (%F:%L) \n" />
+		</layout>
+	</appender>
+
+	<appender name="LOGFILE" class="org.apache.log4j.FileAppender">
+		<param name="File" value="${whisper.root}/whisper.log" />
+		<param name="Append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %5p %c{1} - %m%n" />
+		</layout>
+	</appender>
+
+	<!-- set the priority to debug for these two values to see nice debugging
+		output -->
+	<category name="java.sql">
+		<priority value="debug" />
+	</category>
+	<category name="com.ibatis">
+		<priority value="debug" />
+	</category>
+
+	<root>
+		<priority value="debug" />
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="LOGFILE" />
+	</root>
+
+</log4j:configuration>

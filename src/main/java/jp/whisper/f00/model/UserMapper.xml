@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jp.whisper.f00.model.UserMapper">
+	<resultMap id="result" type="jp.whisper.f00.model.User">
+		            <result property="id" column="ID" jdbcType="NUMERIC" />
+            <result property="loginId" column="LOGIN_ID" jdbcType="VARCHAR" />
+            <result property="password" column="PASSWORD" jdbcType="VARCHAR" />
+            <result property="name" column="NAME" jdbcType="VARCHAR" />
+            <result property="email" column="EMAIL" jdbcType="VARCHAR" />
+            <result property="phone" column="PHONE" jdbcType="VARCHAR" />
+            <result property="mobile" column="MOBILE" jdbcType="VARCHAR" />
+            <result property="department" column="DEPARTMENT" jdbcType="VARCHAR" />
+            <result property="createTime" column="CREATE_TIME" />
+            <result property="updateTime" column="UPDATE_TIME" />
+            <result property="deleteFlag" column="DELETE_FLAG" jdbcType="VARCHAR" />
+
+	</resultMap>
+
+ 	<sql id="other-condition">
+            <if test="id != null"> and ID=#{id}</if>
+            <if test="loginId != null"> and  LOGIN_ID = #{loginId}</if>
+            <if test="password != null"> and  PASSWORD = #{password}</if>
+            <if test="name != null"> and  NAME = #{name}</if>
+            <if test="email != null"> and  EMAIL = #{email}</if>
+            <if test="phone != null"> and  PHONE = #{phone}</if>
+            <if test="mobile != null"> and  MOBILE = #{mobile}</if>
+            <if test="department != null"> and  DEPARTMENT = #{department}</if>
+            <if test="createTime != null"> and  CREATE_TIME = #{createTime}</if>
+            <if test="updateTime != null"> and  UPDATE_TIME = #{updateTime}</if>
+            <if test="deleteFlag != null"> and  DELETE_FLAG = #{deleteFlag}</if>
+
+ 	</sql>
+
+	<select id="select" resultMap="result">
+		SELECT ID,LOGIN_ID,PASSWORD,NAME,EMAIL,PHONE,MOBILE,DEPARTMENT,CREATE_TIME,UPDATE_TIME,DELETE_FLAG FROM USERS
+		<where>
+		    delete_flag ='0'
+		    <if test="value != null "> and ID=#{value}</if>
+		</where>
+	</select>
+
+	<select id="selectByMap" resultMap="result" >
+		SELECT ID,LOGIN_ID,PASSWORD,NAME,EMAIL,PHONE,MOBILE,DEPARTMENT,CREATE_TIME,UPDATE_TIME,DELETE_FLAG FROM USERS
+		<where>
+		    delete_flag ='0'
+			<if test="findBy != null">
+				<include refid = "other-condition"/>
+			</if>
+			<if test="findLikeBy != null">
+                <if test="loginId != null "> and LOGIN_ID like '%#{loginId}%'</if>
+                <if test="password != null "> and PASSWORD like '%#{password}%'</if>
+                <if test="name != null "> and NAME like '%#{name}%'</if>
+                <if test="email != null "> and EMAIL like '%#{email}%'</if>
+                <if test="phone != null "> and PHONE like '%#{phone}%'</if>
+                <if test="mobile != null "> and MOBILE like '%#{mobile}%'</if>
+                <if test="department != null "> and DEPARTMENT like '%#{department}%'</if>
+                <if test="deleteFlag != null "> and DELETE_FLAG like '%#{deleteFlag}%'</if>
+
+			</if>
+		</where>
+	</select>
+
+	<select id="query" resultMap="result" parameterType="jp.whisper.f00.model.UserQuery">
+		<include refid="BaseMapper.paginationStart"/>
+			SELECT ID,LOGIN_ID,PASSWORD,NAME,EMAIL,PHONE,MOBILE,DEPARTMENT,CREATE_TIME,UPDATE_TIME,DELETE_FLAG FROM USERS WHERE delete_flag ='0'
+			<include refid = "other-condition"/>
+		<if test="sortname != null"> ORDER BY #{sortname}  #{sortorder} </if>
+		<include refid="BaseMapper.paginationEnd"/>
+	</select>
+
+	<select id="count" resultType="int" parameterType="jp.whisper.f00.model.UserQuery">
+	     SELECT count(ID)  FROM USERS WHERE delete_flag ='0'
+			<include refid = "other-condition"/>
+	</select>
+
+	<insert id="insert" parameterType="jp.whisper.f00.model.User">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+		 SELECT	SEQ_USERS.NEXTVAL AS id FROM dual
+	 	</selectKey>
+	 	INSERT INTO USERS( ID,LOGIN_ID,PASSWORD,NAME,EMAIL,PHONE,MOBILE,DEPARTMENT,CREATE_TIME,UPDATE_TIME,DELETE_FLAG ) VALUES (#{id},#{loginId},#{password},#{name},#{email},#{phone},#{mobile},#{department},systimestamp,null,'0' )
+	</insert>
+
+	<insert id="insertWithObjectKey" parameterType="jp.whisper.f00.model.User">
+	 	INSERT INTO USERS( ID,LOGIN_ID,PASSWORD,NAME,EMAIL,PHONE,MOBILE,DEPARTMENT,CREATE_TIME,UPDATE_TIME,DELETE_FLAG ) VALUES (#{id},#{loginId},#{password},#{name},#{email},#{phone},#{mobile},#{department},systimestamp,null,'0' )
+	</insert>
+
+	<update id="update" parameterType="jp.whisper.f00.model.User">
+		UPDATE USERS SET LOGIN_ID=#{loginId},PASSWORD=#{password},NAME=#{name},EMAIL=#{email},PHONE=#{phone},MOBILE=#{mobile},DEPARTMENT=#{department},UPDATE_TIME= systimestamp WHERE ID=#{id}
+	</update>
+
+	<update id="updateMapModel" parameterType="java.util.Map">
+		UPDATE USERS SET update_time=systimestamp
+    <set>
+        <if test="loginId != null ">LOGIN_ID=#{loginId},</if>
+        <if test="loginId == null ">LOGIN_ID=null ,</if>
+        <if test="password != null ">PASSWORD=#{password},</if>
+        <if test="password == null ">PASSWORD=null ,</if>
+        <if test="name != null ">NAME=#{name},</if>
+        <if test="name == null ">NAME=null ,</if>
+        <if test="email != null ">EMAIL=#{email},</if>
+        <if test="email == null ">EMAIL=null ,</if>
+        <if test="phone != null ">PHONE=#{phone},</if>
+        <if test="phone == null ">PHONE=null ,</if>
+        <if test="mobile != null ">MOBILE=#{mobile},</if>
+        <if test="mobile == null ">MOBILE=null ,</if>
+        <if test="department != null ">DEPARTMENT=#{department},</if>
+        <if test="department == null ">DEPARTMENT=null ,</if>
+    </set>
+         WHERE ID=#{id}
+	</update>
+
+	<delete id="deleteByPrimaryKey">
+    	DELETE FROM USERS WHERE ID = #{value}
+  	</delete>
+
+	<delete id="delete">
+    	DELETE FROM USERS
+		<where>
+			<include refid = "other-condition"/>
+		</where>
+  	</delete>
+
+  	<update id="logicDeleteByPrimaryKey">
+    	UPDATE USERS SET delete_flag='1', update_time=systimestamp WHERE ID = #{value}
+  	</update>
+
+  	<update id="logicDelete">
+    	UPDATE USERS SET delete_flag='1', update_time=systimestamp
+		<where>
+			<include refid = "other-condition"/>
+		</where>
+  	</update>
+</mapper>
+

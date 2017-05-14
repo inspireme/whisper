@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<http authentication-manager-ref="authenticationManager"
+		access-decision-manager-ref="accessDecisionManager" auto-config="false"
+		use-expressions="true" entry-point-ref="loginUrlAuthenticationEntryPoint">
+		<access-denied-handler error-page="/common/accessDenied.jsp" />
+		<custom-filter ref="customerAuthenticationProcessingFilter"
+			position="FORM_LOGIN_FILTER" />
+
+		<custom-filter ref="filterSecurityInterceptor" after="FORM_LOGIN_FILTER" />
+
+		<intercept-url pattern="/resources/**" access="permitAll" />
+		<intercept-url pattern="/common/**" access="permitAll" />
+		<intercept-url pattern="/portal/login" access="permitAll" />
+		<intercept-url pattern="/**" access="isAuthenticated()" />
+
+		<!-- <form-login login-page="/portal/login" username-parameter="${security.username}"
+			password-parameter="${security.password}" login-processing-url="/j_spring_security_check"
+			authentication-failure-url="/portal/login?error=true" default-target-url="/portal/main"
+			/> -->
+
+		<logout invalidate-session="true" logout-success-url="/portal/login"
+			delete-cookies="JSESSIONID" logout-url="/j_spring_security_logout" />
+
+		<session-management invalid-session-url="/portal/login">
+			<concurrency-control max-sessions="1"
+				expired-url="/portal/login" />
+		</session-management>
+
+		<csrf disabled="true"/>
+	</http>
+
+	<!-- Configuring RoleVoter bean to use custom access roles, by roles should
+		be in the form AUTH_{XXX} -->
+	<beans:bean id="accessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<beans:property name="allowIfAllAbstainDecisions"
+			value="false" />
+		<beans:constructor-arg>
+			<beans:list>
+				<beans:bean class="org.springframework.security.access.vote.RoleVoter">
+					<beans:property name="rolePrefix" value="${security.authcode.prefix}" />
+				</beans:bean>
+				<beans:bean
+					class="org.springframework.security.access.vote.AuthenticatedVoter" />
+				<beans:bean
+					class="org.springframework.security.web.access.expression.WebExpressionVoter" />
+			</beans:list>
+		</beans:constructor-arg>
+	</beans:bean>
+
+	<beans:bean id="loginUrlAuthenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<beans:constructor-arg value="/portal/login" /> <!-- loginFormUrl -->
+	</beans:bean>
+
+	<beans:bean id="customerAuthenticationProcessingFilter"
+		class="jp.whisper.common.security.CustomerAuthenticationProcessingFilter">
+		<!-- (5) -->
+		<beans:constructor-arg value="/portal/dologin" />
+		<!-- <beans:property name="requiresAuthenticationRequestMatcher"> <beans:bean
+			class="org.springframework.security.web.util.matcher.AndRequestMatcher">
+			<beans:constructor-arg> <beans:list> <beans:bean class="org.springframework.security.web.util.matcher.RegexRequestMatcher">
+			<beans:constructor-arg index="0" value="^((?!/portal/login).)*$" /> <beans:constructor-arg
+			index="1" value="" /> </beans:bean> <beans:bean class="org.springframework.security.web.util.matcher.RegexRequestMatcher">
+			<beans:constructor-arg index="0" value="^((?!/resources/).)*$" /> <beans:constructor-arg
+			index="1" value="" /> </beans:bean> <beans:bean class="org.springframework.security.web.util.matcher.RegexRequestMatcher">
+			<beans:constructor-arg index="0" value="^((?!/common/).)*$" /> <beans:constructor-arg
+			index="1" value="" /> </beans:bean> </beans:list> </beans:constructor-arg>
+			</beans:bean> </beans:property> -->
+		<!-- (6) -->
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<!-- (7) -->
+       <beans:property name="sessionAuthenticationStrategy"
+			ref="sessionAuthenticationStrategy" />
+		<!-- (8) -->
+		<beans:property name="authenticationFailureHandler">
+			<beans:bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+				<beans:property name="defaultFailureUrl" value="/portal/login?op=error" />
+			</beans:bean>
+		</beans:property>
+		<!-- (9) -->
+		<beans:property name="authenticationSuccessHandler">
+			<beans:bean
+				class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+				<beans:constructor-arg value="/portal/main" />
+			</beans:bean>
+		</beans:property>
+		<beans:property name="usernameParameter" value="${security.username}" />
+		<beans:property name="passwordParameter" value="${security.password}" />
+		<beans:property name="postOnly" value="false" />
+	</beans:bean>
+
+	<!-- (6') -->
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="customerAuthenticationProvider" />
+	</authentication-manager>
+	<beans:bean id="customerAuthenticationProvider"
+		class="jp.whisper.common.security.CustomerAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="userDetailsService" />
+		<!--<beans:property name="passwordEncoder" ref="passwordEncoder" /> --><!-- default PlaintextPasswordEncoder -->
+	</beans:bean>
+
+	<beans:bean id="sessionAuthenticationStrategy"
+		class="org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy">
+		<beans:constructor-arg>
+			<beans:list>
+	  		    <beans:bean
+					class="org.springframework.security.web.csrf.CsrfAuthenticationStrategy">
+					<beans:constructor-arg ref="csrfTokenRepository" />
+				</beans:bean>
+				<beans:bean
+					class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy" />
+			</beans:list>
+		</beans:constructor-arg>
+	</beans:bean>
+
+	<beans:bean id="csrfTokenRepository"
+		class="org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository" />
+
+	<beans:bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<beans:property name="securityMetadataSource" ref="databaseObjectDefinitionSource" />
+		<beans:property name="accessDecisionManager" ref="accessDecisionManager" />
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<beans:property name="validateConfigAttributes" value="true" />
+	</beans:bean>
+
+	<beans:bean id="databaseObjectDefinitionSource"
+		class="org.springframework.security.web.access.intercept.DefaultFilterInvocationSecurityMetadataSource">
+		<beans:constructor-arg ref="requestMap" />
+	</beans:bean>
+
+</beans:beans>

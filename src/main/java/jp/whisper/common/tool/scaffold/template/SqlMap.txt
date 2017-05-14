@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${modelPath}Mapper">
+	<resultMap id="result" type="${modelPath}">
+		${resultMap}
+	</resultMap>
+
+ 	<sql id="other-condition">
+${otherCondition}
+ 	</sql>
+
+	<select id="select" resultMap="result">
+		${selectStatement}
+		<where>
+		    delete_flag ='0'
+		    <if test="value != null "> and ${primaryKey}=#{value}</if>
+		</where>
+	</select>
+
+	<select id="selectByMap" resultMap="result" >
+		${selectStatement}
+		<where>
+		    delete_flag ='0'
+			<if test="findBy != null">
+				<include refid = "other-condition"/>
+			</if>
+			<if test="findLikeBy != null">
+${findLikeBy}
+			</if>
+		</where>
+	</select>
+
+	<select id="query" resultMap="result" parameterType="${modelQueryPath}">
+		<include refid="BaseMapper.paginationStart"/>
+			${selectStatement} WHERE delete_flag ='0'
+			<include refid = "other-condition"/>
+		<if test="sortname != null"> ORDER BY #{sortname}  #{sortorder} </if>
+		<include refid="BaseMapper.paginationEnd"/>
+	</select>
+
+	<select id="count" resultType="int" parameterType="${modelQueryPath}">
+	     ${countSelectStatement} WHERE delete_flag ='0'
+			<include refid = "other-condition"/>
+	</select>
+
+	<insert id="insert" parameterType="${modelPath}">
+		<selectKey keyProperty="id" resultType="long" order="BEFORE">
+		 SELECT	SEQ_${tblName}.NEXTVAL AS id FROM dual
+	 	</selectKey>
+	 	${insertStatement}
+	</insert>
+
+	<insert id="insertWithObjectKey" parameterType="${modelPath}">
+	 	${insertStatement}
+	</insert>
+
+	<update id="update" parameterType="${modelPath}">
+		${updateStatement}
+	</update>
+
+	<update id="updateMapModel" parameterType="java.util.Map">
+		${updateMapModel}
+	</update>
+
+	<delete id="deleteByPrimaryKey">
+    	DELETE FROM ${tblName} WHERE ${primaryKey} = #{value}
+  	</delete>
+
+	<delete id="delete">
+    	DELETE FROM ${tblName}
+		<where>
+			<include refid = "other-condition"/>
+		</where>
+  	</delete>
+
+  	<update id="logicDeleteByPrimaryKey">
+    	UPDATE ${tblName} SET delete_flag='1', update_time=systimestamp WHERE ${primaryKey} = #{value}
+  	</update>
+
+  	<update id="logicDelete">
+    	UPDATE ${tblName} SET delete_flag='1', update_time=systimestamp
+		<where>
+			<include refid = "other-condition"/>
+		</where>
+  	</update>
+</mapper>
+

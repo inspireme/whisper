@@ -1,0 +1,20 @@
+package ${pkgPath};
+
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import jp.whisper.common.dao.impl.BaseDAOImpl;
+import ${daoPath};
+import ${modelPath};
+
+@Repository
+public class ${clzName}DAOImpl extends BaseDAOImpl<${clzName}> implements ${clzName}DAO
+{
+	@Autowired
+	public ${clzName}DAOImpl(SqlSessionFactory sqlSessionFactory) {
+		super();
+		super.setSqlSessionFactory(sqlSessionFactory);
+	}
+}
+
